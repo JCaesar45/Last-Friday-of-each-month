@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Last Friday | Temporal Precision Suite</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Inter:wght@300;400;500;600&display=swap');
+
+    :root {
+      --bg-deep: #0a0a0f;
+      --bg-panel: rgba(20, 20, 28, 0.72);
+      --gold: #d4af37;
+      --gold-soft: #f3e5ab;
+      --rose: #c9a0a0;
+      --text: #f0f0f5;
+      --muted: #9a9aad;
+      --border: rgba(212, 175, 55, 0.18);
+      --shadow: 0 24px 80px rgba(0, 0, 0, 0.55);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-deep);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .grain {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.035;
+      z-index: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    }
+
+    .glow {
+      position: fixed;
+      width: 800px;
+      height: 800px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(212,175,55,0.12) 0%, transparent 70%);
+      top: -200px;
+      left: -200px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .glow-2 {
+      position: fixed;
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(201,160,160,0.08) 0%, transparent 70%);
+      bottom: -150px;
+      right: -150px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.5rem 4rem;
+      z-index: 100;
+      backdrop-filter: blur(16px);
+      background: rgba(10, 10, 15, 0.72);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .brand {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem;
+      letter-spacing: 1px;
+      color: var(--gold);
+    }
+
+    .brand span {
+      color: var(--text);
+      font-weight: 300;
+    }
+
+    .links a {
+      color: var(--muted);
+      text-decoration: none;
+      margin-left: 2rem;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      transition: color 0.3s ease;
+    }
+
+    .links a:hover {
+      color: var(--gold);
+    }
+
+    main {
+      position: relative;
+      z-index: 1;
+      padding-top: 8rem;
+    }
+
+    .hero {
+      text-align: center;
+      padding: 6rem 1rem 4rem;
+    }
+
+    .hero h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(3rem, 8vw, 6.5rem);
+      line-height: 1.05;
+      background: linear-gradient(135deg, var(--gold-soft) 0%, var(--gold) 50%, var(--rose) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero p {
+      max-width: 640px;
+      margin: 1.5rem auto 0;
+      color: var(--muted);
+      font-size: 1.15rem;
+      line-height: 1.7;
+    }
+
+    .panel {
+      max-width: 520px;
+      margin: 3rem auto;
+      padding: 2.5rem;
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      backdrop-filter: blur(24px);
+      box-shadow: var(--shadow);
+    }
+
+    .input-row {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .field {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .field label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--muted);
+      margin-bottom: 0.5rem;
+    }
+
+    .field input {
+      padding: 0.95rem 1rem;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--text);
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .field input:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.12);
+    }
+
+    button {
+      width: 100%;
+      padding: 1.1rem;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--gold), #b8962e);
+      color: #0a0a0f;
+      font-weight: 600;
+      font-size: 0.95rem;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.3s ease;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 32px rgba(212, 175, 55, 0.25);
+    }
+
+    .result {
+      margin-top: 1.75rem;
+      padding: 1.5rem;
+      border-radius: 16px;
+      background: rgba(212, 175, 55, 0.08);
+      border: 1px solid rgba(212, 175, 55, 0.25);
+      text-align: center;
+      opacity: 0;
+      transform: translateY(12px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+
+    .result.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .result .label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--gold);
+      margin-bottom: 0.5rem;
+    }
+
+    .result .value {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.4rem;
+      color: var(--text);
+    }
+
+    .calendar-wrap {
+      margin-top: 2rem;
+      display: none;
+    }
+
+    .calendar-wrap.visible {
+      display: block;
+      animation: fadeIn 0.6s ease;
+    }
+
+    .calendar-header {
+      text-align: center;
+      font-size: 1.1rem;
+      color: var(--gold-soft);
+      margin-bottom: 1rem;
+      font-family: 'Playfair Display', serif;
+    }
+
+    .calendar {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 0.5rem;
+    }
+
+    .day-label {
+      text-align: center;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--muted);
+      padding: 0.5rem 0;
+    }
+
+    .day {
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid transparent;
+      transition: all 0.3s ease;
+    }
+
+    .day.filled:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: var(--border);
+    }
+
+    .day.target {
+      background: linear-gradient(135deg, var(--gold), #b8962e);
+      color: #0a0a0f;
+      font-weight: 700;
+      box-shadow: 0 8px 24px rgba(212, 175, 55, 0.25);
+    }
+
+    .day.empty {
+      background: transparent;
+    }
+
+    section {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 5rem 1.5rem;
+    }
+
+    .section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.2rem;
+      color: var(--gold-soft);
+      margin-bottom: 1rem;
+    }
+
+    .section-sub {
+      color: var(--muted);
+      max-width: 700px;
+      line-height: 1.7;
+      margin-bottom: 2.5rem;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .card {
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 1.75rem;
+      backdrop-filter: blur(20px);
+      transition: transform 0.3s ease, border-color 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-6px);
+      border-color: rgba(212, 175, 55, 0.4);
+    }
+
+    .card h3 {
+      font-family: 'Playfair Display', serif;
+      color: var(--gold);
+      margin-bottom: 0.5rem;
+      font-size: 1.25rem;
+    }
+
+    .card p {
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.6;
+    }
+
+    .stack-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+    }
+
+    .stack-item {
+      padding: 1.25rem;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      text-align: center;
+    }
+
+    .stack-item strong {
+      display: block;
+      color: var(--gold-soft);
+      margin-bottom: 0.35rem;
+    }
+
+    .stack-item span {
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    footer {
+      text-align: center;
+      padding: 4rem 1rem 3rem;
+      color: var(--muted);
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+    }
+
+    footer a {
+      color: var(--gold);
+      text-decoration: none;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 640px) {
+      nav { padding: 1rem 1.5rem; }
+      .links { display: none; }
+      .panel { padding: 1.5rem; }
+      .input-row { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <div class="grain"></div>
+  <div class="glow"></div>
+  <div class="glow-2"></div>
+
+  <nav>
+    <div class="brand">LAST <span>FRIDAY</span></div>
+    <div class="links">
+      <a href="#calculator">Calculator</a>
+      <a href="#architecture">Architecture</a>
+      <a href="#stack">Stack</a>
+    </div>
+  </nav>
+
+  <main>
+    <header class="hero">
+      <h1>Temporal Precision</h1>
+      <p>A reference implementation for calculating the last Friday of any month, rendered as an immersive, interactive experience. Built for engineers, shown to clients, and remembered by everyone who sees it.</p>
+
+      <div class="panel" id="calculator">
+        <div class="input-row">
+          <div class="field">
+            <label for="year">Year</label>
+            <input type="number" id="year" value="2026" min="1" max="9999" />
+          </div>
+          <div class="field">
+            <label for="month">Month</label>
+            <input type="number" id="month" value="8" min="1" max="12" />
+          </div>
+        </div>
+        <button id="compute">Compute Last Friday</button>
+        <div class="result" id="result">
+          <div class="label">Last Friday</div>
+          <div class="value" id="resultValue"></div>
+        </div>
+        <div class="calendar-wrap" id="calendarWrap">
+          <div class="calendar-header" id="calendarHeader"></div>
+          <div class="calendar" id="calendar"></div>
+        </div>
+      </div>
+    </header>
+
+    <section id="architecture">
+      <h2 class="section-title">How It Works</h2>
+      <p class="section-sub">The algorithm is deliberately minimal yet robust: determine the final day of the month, measure the offset to the preceding Friday, and subtract. We ship the same logic in four runtimes so teams can integrate it anywhere.</p>
+      <div class="cards">
+        <div class="card">
+          <h3>JavaScript Frontend</h3>
+          <p>Embedded directly in this page, the client-side engine uses the native Date object with zero-rollover behavior to compute the last day of the month reliably.</p>
+        </div>
+        <div class="card">
+          <h3>Python Backend</h3>
+          <p>A Flask service exposing REST endpoints. Uses datetime.date with replace and timedelta for explicit, readable arithmetic.</p>
+        </div>
+        <div class="card">
+          <h3>TypeScript Backend</h3>
+          <p>An Express service with typed request/response contracts. Leverages the Intl.DateTimeFormat API and native Date semantics.</p>
+        </div>
+        <div class="card">
+          <h3>Java Backend</h3>
+          <p>A Spring Boot application using java.time.YearMonth and TemporalAdjusters.lastInMonth for a declarative, timezone-safe implementation.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="stack">
+      <h2 class="section-title">Technical Stack</h2>
+      <p class="section-sub">Every layer was chosen for production credibility, developer ergonomics, and visual impact.</p>
+      <div class="stack-grid">
+        <div class="stack-item"><strong>HTML5</strong><span>Semantic structure, accessibility</span></div>
+        <div class="stack-item"><strong>CSS3</strong><span>Glassmorphism, gradients, grids</span></div>
+        <div class="stack-item"><strong>Vanilla JS</strong><span>No framework dependency</span></div>
+        <div class="stack-item"><strong>Python 3</strong><span>Flask microservice</span></div>
+        <div class="stack-item"><strong>TypeScript</strong><span>Express with strict types</span></div>
+        <div class="stack-item"><strong>Java 17</strong><span>Spring Boot + java.time</span></div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Crafted as a portfolio-grade reference. Sources include MDN Web Docs, Python Software Foundation, Oracle, and Node.js documentation.</p>
+    <p style="margin-top:0.5rem;"><a href="https://github.com">View on GitHub</a></p>
+  </footer>
+
+  <script>
+    (function () {
+      const yearInput = document.getElementById('year');
+      const monthInput = document.getElementById('month');
+      const computeBtn = document.getElementById('compute');
+      const result = document.getElementById('result');
+      const resultValue = document.getElementById('resultValue');
+      const calendarWrap = document.getElementById('calendarWrap');
+      const calendarHeader = document.getElementById('calendarHeader');
+      const calendar = document.getElementById('calendar');
+
+      const MONTHS = [
+        'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'
+      ];
+
+      const DAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+      function lastFriday(year, month) {
+        const lastDay = new Date(year, month, 0);
+        const daysBack = (lastDay.getDay() - 5 + 7) % 7;
+        return lastDay.getDate() - daysBack;
+      }
+
+      function renderCalendar(year, month, targetDay) {
+        calendar.innerHTML = '';
+        calendarHeader.textContent = `${MONTHS[month - 1]} ${year}`;
+
+        DAY_LABELS.forEach(label => {
+          const el = document.createElement('div');
+          el.className = 'day-label';
+          el.textContent = label;
+          calendar.appendChild(el);
+        });
+
+        const firstDay = new Date(year, month - 1, 1).getDay();
+        const daysInMonth = new Date(year, month, 0).getDate();
+
+        for (let i = 0; i < firstDay; i++) {
+          const el = document.createElement('div');
+          el.className = 'day empty';
+          calendar.appendChild(el);
+        }
+
+        for (let d = 1; d <= daysInMonth; d++) {
+          const el = document.createElement('div');
+          el.className = 'day filled' + (d === targetDay ? ' target' : '');
+          el.textContent = d;
+          calendar.appendChild(el);
+        }
+      }
+
+      function handleCompute() {
+        const year = parseInt(yearInput.value, 10);
+        const month = parseInt(monthInput.value, 10);
+
+        if (!year || month < 1 || month > 12) {
+          resultValue.textContent = 'Invalid input';
+          result.classList.add('visible');
+          calendarWrap.classList.remove('visible');
+          return;
+        }
+
+        const day = lastFriday(year, month);
+        resultValue.textContent = `${MONTHS[month - 1]} ${day}, ${year}`;
+        result.classList.add('visible');
+
+        renderCalendar(year, month, day);
+        calendarWrap.classList.add('visible');
+      }
+
+      computeBtn.addEventListener('click', handleCompute);
+      yearInput.addEventListener('keydown', e => { if (e.key === 'Enter') handleCompute(); });
+      monthInput.addEventListener('keydown', e => { if (e.key === 'Enter') handleCompute(); });
+
+      window.addEventListener('DOMContentLoaded', handleCompute);
+    })();
+  </script>
+</body>
+</html>
